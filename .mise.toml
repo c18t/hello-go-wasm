@@ -1,0 +1,44 @@
+[env]
+'_'.file = '.env'
+
+[tools]
+node = "22.5.1"
+goreleaser = "2.1.0"
+pre-commit = "3.7.1"
+shellcheck = "0.10.0"
+"npm:prettier" = "3.3.3"
+"go:github.com/shurcooL/goexec" = "latest"
+"go:github.com/shurcooL/go-goon" = "latest"
+
+[tasks.setup]
+description = "Setup (Runs all `setup:*` tasks)"
+depends = ["setup:mise", "setup:go-mod"]
+run = "mise run setup:pre-commit"
+
+[tasks."setup:mise"]
+description = "Install dev dependencies with mise"
+run = "mise install -y"
+
+[tasks."setup:go-mod"]
+description = "Install go modules with go.mod"
+run = "go mod download"
+
+[tasks."setup:pre-commit"]
+description = "Set up pre-commit hooks"
+depends = ["setup:mise"]
+run = "pre-commit install"
+
+[tasks.build]
+description = "Build main.wasm"
+alias = "b"
+run = "GOOS=js GOARCH=wasm go build -o bin/main.wasm"
+
+[tasks.server]
+description = "run http server"
+alias = "s"
+run = "goexec 'http.ListenAndServe(`:8080`, http.FileServer(http.Dir(`.`)))'"
+
+[tasks.release]
+description = "Build release binaries"
+alias = "r"
+run = "goreleaser release --snapshot --clean"
