@@ -5,14 +5,48 @@
     <script>
       const go = new Go();
       WebAssembly.instantiateStreaming(
-        fetch('/bin/main.wasm'),
+        fetch('/bin/hello.wasm'),
         go.importObject,
       ).then((result) => {
         go.run(result.instance);
       });
+      let instance_fib;
+      WebAssembly.instantiateStreaming(
+        fetch('/bin/fib.wasm'),
+        go.importObject,
+      ).then((result) => {
+        go.run(result.instance);
+        instance_fib = result.instance;
+      });
+
+      function fib_onChange() {
+        const arg = document.getElementById('fib_input').value - 0;
+        document.getElementById('fib_arg').innerText = arg;
+
+        // go 1.25以降はgo側に go:wasmexport 書くだけでエクスポートできるようになる
+        // const result = instance_fib.exports.fib();
+        const result = fib(arg);
+        const fib_result = (document.getElementById('fib_result').innerText =
+          result);
+      }
     </script>
   </head>
   <body>
-    <p>Open DevTools console.</p>
+    <header>
+      <h1>hello-go-wasm</h1>
+      <p>Open DevTools console</p>
+    </header>
+    <hr />
+    <h2>hello.wasm</h2>
+    <p id="hello"></p>
+    <hr />
+    <h2>fib.wasm</h2>
+    <input
+      type="text"
+      id="fib_input"
+      placeholder="input number"
+      onchange="fib_onChange()"
+    />
+    <p>fib(<span id="fib_arg"></span>) is <span id="fib_result"></span></p>
   </body>
 </html>

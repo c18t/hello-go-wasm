@@ -31,7 +31,7 @@ run = "pre-commit install"
 [tasks.build]
 description = "Build main.wasm"
 alias = "b"
-run = "GOOS=js GOARCH=wasm go build -o bin/main.wasm"
+run = "go build -o bin/{{arg(i=0, name='package name')}}.wasm ./{{arg(i=0, name='package name')}}"
 
 [tasks.server]
 description = "run http server"
